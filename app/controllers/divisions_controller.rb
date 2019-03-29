@@ -25,8 +25,12 @@ class DivisionsController < ApplicationController
   # POST /divisions.json
   def create
     @division = Division.new(division_params)
-
+    p division_params
+    puts @division
+    puts @division.attributes
     respond_to do |format|
+      res = @division.save!
+      puts res
       if @division.save
         format.html { redirect_to @division, notice: 'Division was successfully created.' }
         format.json { render :show, status: :created, location: @division }
@@ -69,6 +73,11 @@ class DivisionsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def division_params
-      params.require(:division).permit(:user_id, :name)
+      # If forms get values from user, User must be gained as User.login_code
+      # and here it convert User.login_code to User itself.
+      strong_param = params.require(:division).permit(:user_login_code, :name)
+      strong_param[:user] = User.find_by(login_code: strong_param[:user_login_code])
+      strong_param.delete("user_login_code")
+      strong_param
     end
 end
